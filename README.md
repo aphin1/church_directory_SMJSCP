@@ -465,7 +465,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 - **Issues**: [GitHub Issues](https://github.com/yourusername/church-directory/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/yourusername/church-directory/discussions)
-- **Email**: smjsc.pune@gmail.com (update with actual contact)
+- **Email**: smjsc.pune@gmail.com
 
 ### Reporting Bugs
 
@@ -524,7 +524,7 @@ When reporting bugs, please include:
 
 ## 📞 Contact
 
-**Project Maintainer**: [Your Name](mailto:aphin.proc@outlook.com)  
+**Project Maintainer**: [aphin1](mailto:aphin.proc@outlook.com)  
 **Project Link**: [https://github.com/yourusername/church-directory](https://github.com/aphin1/church_directory_SMJSCP)
 
 ---
