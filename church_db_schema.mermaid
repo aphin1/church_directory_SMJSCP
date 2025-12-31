@@ -2,9 +2,10 @@ erDiagram
     Users ||--o{ AuditLog : creates
     Users {
         int user_id PK
-        string username UK
+        string email UK "Primary identifier, must be in Members table"
         string password_hash
-        string role "Super Admin, Admin, Add-Member, View-Member"
+        string role "Super Admin, Admin, Add-Member"
+        string reference_email "For Add-Member: existing member who vouched"
         string recovery_code_hash "For Super Admin only"
         datetime created_at
         datetime last_login
@@ -14,9 +15,10 @@ erDiagram
     Families ||--o{ Members : contains
     Families ||--o{ DepartedMembers : contains
     Families }o--|| PrayerGroups : belongs_to
+    Families ||--o{ DuplicateFamilyAlerts : triggers
     Families {
         int family_id PK
-        string family_name
+        string family_name "Head of Family Name, min 3 chars"
         string current_address
         string home_address
         string parish
@@ -24,8 +26,9 @@ erDiagram
         string photo_path "Relative path to image file"
         datetime created_at
         datetime updated_at
-        boolean is_deleted "Soft delete flag"
+        boolean is_deleted "Soft delete flag (visible to Admin only)"
         datetime deleted_at
+        string deletion_reason "Mandatory reason for soft delete"
     }
 
     Members {
@@ -49,12 +52,18 @@ erDiagram
         int departed_id PK
         int family_id FK
         string name
+        string gender "Male, Female, Other"
         string relation
-        date date_of_birth "Optional"
-        date date_of_death
+        date date_of_birth "Optional, DD/MM, year optional"
+        int birth_year "Optional"
+        date date_of_death "DD/MM, year optional"
+        int death_year "Optional"
         string notes "Optional burial location, etc"
         datetime created_at
         datetime updated_at
+        boolean is_deleted "Soft delete flag (visible to Admin only)"
+        datetime deleted_at
+        string deletion_reason "Mandatory reason for soft delete"
     }
 
     PrayerGroups {
@@ -73,7 +82,20 @@ erDiagram
         string target_table "families, members, departed_members, etc"
         int target_id "ID of affected record"
         text details_json "JSON with before/after values"
+        string deletion_method "Auto-deleted by system or Deleted by Super Admin: [username]"
         datetime timestamp
+    }
+
+    DuplicateFamilyAlerts {
+        int alert_id PK
+        int family_id_1 FK
+        int family_id_2 FK
+        string family_name "Duplicate name"
+        datetime detected_at
+        boolean is_resolved
+        string resolution_action "keep_both, deleted_one, renamed"
+        int resolved_by_user_id FK
+        datetime resolved_at
     }
 
     CrashReports {

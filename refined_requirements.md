@@ -237,49 +237,83 @@ First launch triggers setup wizard:
 ## 7. Member & Family Data Structure
 
 ### Family Fields
-- **Family name** (required, 100 characters)
+- **Head of Family Name / Family Name** (required, 3-100 characters)
+  - Field label shows: "Head of Family Name (Family Name)"
+  - Minimum 3 characters required
+  - **Duplicate Name Handling**:
+    - When user enters a family name that already exists:
+      - Show warning popup: "A family with this name already exists. Do you want to proceed?"
+      - Buttons: "Change Name" | "Proceed Anyway"
+      - If "Proceed Anyway": Family is created
+      - System sends notification to Admin about duplicate family name
+      - Admin dashboard shows alert: "Duplicate family names detected: [Family Name]. Review and keep both or delete one."
+      - Admin can review both families and choose action
 - **Current address** (500 characters)
 - **Home address** (500 characters)
 - **Parish** (100 characters)
 - **Prayer group** (required, dropdown)
 - **Photo path** (relative path to image file)
 - **Timestamps**: Created, updated, deleted dates
-- **Soft delete flag**
+- **Soft delete flag** (visible to Admin/Super Admin only)
 
 ### Member Fields
 - **Name** (required, 100 characters)
+- **Gender** (required, dropdown: Male/Female/Other)
+  - Stored in database
+  - **Visible during**: Add, Edit, and Export operations
+  - **Hidden in**: Main family card view and member lists
+  - Only Admin can see gender in admin-specific views
 - **Relation to family** (required, dropdown):
   - Head of Family (HOF)
   - Spouse
-  - Child (Son/Daughter)
+  - Son
+  - Daughter
+  - Son-in-law
+  - Daughter-in-law
   - Parent
   - Sibling
   - Other
-- **Date of Birth** (required, date picker)
-- **Date of Marriage** (optional, date picker, NULL if unmarried)
+- **Date of Birth** (required, date picker with DD/MM/YYYY format)
+  - Year is optional during data entry
+  - If year omitted, stored as NULL
+  - **Display Rules**:
+    - **View-Member/Add-Member role**: Shows only DD/MM (year and age hidden)
+    - **Admin/Super Admin role**: Shows full DD/MM/YYYY and age
+- **Date of Marriage** (optional, DD/MM/YYYY format, year optional, NULL if unmarried)
+  - **Special Case for Son-in-law/Daughter-in-law**:
+    - Additional field appears: "Spouse" (dropdown)
+    - Dropdown populated with family's son/daughter names
+    - Used for anniversary notifications to correctly identify couples
 - **Profession** (100 characters)
 - **Email** (optional but unique if provided, 100 characters)
-- **Phone** (20 characters, format: +91-XXXXXXXXXX)
+  - Primary identifier for user access (see User Management section)
+- **Phone** (30 characters, international format supported: +XX-XXXXXXXXXX)
+  - Format validation for international numbers
+  - Examples: +91-9876543210, +1-555-123-4567, +44-20-7123-4567
 - **Is Head of Family** (boolean, exactly one per family)
 - **Timestamps**: Created, updated, deleted dates
-- **Soft delete flag**
+- **Soft delete flag** (visible to Admin/Super Admin only)
 
 ### Departed Member Fields
 - **Name** (required, 100 characters)
+- **Gender** (required, dropdown: Male/Female/Other)
 - **Relation** (required, same dropdown as members)
-- **Date of Birth** (optional)
-- **Date of Death** (required)
+- **Date of Birth** (optional, DD/MM/YYYY, year optional)
+- **Date of Death** (required, DD/MM/YYYY, year optional)
 - **Notes** (optional, 500 characters - burial location, etc.)
-- **Timestamps**: Created, updated
+- **Timestamps**: Created, updated, deleted dates
+- **Soft delete flag** (visible to Admin/Super Admin only)
 
 ### Validation Rules
 - At least one member must be marked as Head of Family
 - Email must be unique across all active members (NULL emails not checked)
 - Email format: basic regex validation (xxx@yyy.zzz)
-- Phone format: optional formatting assistance
+- Phone format: International number validation with country code
+- DOB: Year optional, DD/MM required
 - DOB cannot be in the future
-- DOD cannot be before DOB
-- DOM cannot be before DOB
+- DOD cannot be before DOB (if both have years)
+- DOM cannot be before DOB (if both have years)
+- Family name: Minimum 3 characters, duplicate warning (not blocking)
 
 ---
 
@@ -287,15 +321,26 @@ First launch triggers setup wizard:
 
 ### Step 1: Family Information
 - **Fields**:
-  - Family name (required)
+  - Head of Family Name (Family Name) (required, 3-100 characters)
   - Current address (optional but recommended)
   - Home address (optional)
   - Parish (required, dropdown from existing + "Add new")
   - Prayer group (required, dropdown)
 - **Validation**:
-  - Family name: 1-100 characters
-  - No duplicate family names in same prayer group (warning, not error)
-- **Navigation**: Next button enabled only when required fields filled
+  - Family name: Minimum 3 characters required
+  - **Duplicate family name check**:
+    - If name already exists in active families:
+      - Show warning popup: "A family with this name already exists. Do you want to proceed?"
+      - Buttons: "Change Name" | "Proceed Anyway"
+    - If "Proceed Anyway":
+      - Family creation continues
+      - System logs duplicate family name event
+      - Notification sent to Admin: "Duplicate family name detected: [Name]. Review families with ID [ID1] and [ID2]."
+      - Admin dashboard shows alert with option to:
+        - View both families
+        - Keep both (dismiss alert)
+        - Delete one (soft delete with reason)
+- **Navigation**: Next button enabled only when required fields filled and minimum length met
 
 ### Step 2: Add Members
 - **Interface**: Editable table/form
@@ -304,14 +349,27 @@ First launch triggers setup wizard:
   - Edit Member (inline or dialog)
   - Delete Member (removes from list before submission)
 - **Member Form**:
-  - All fields from Member structure above
+  - Name (required)
+  - Gender (required dropdown: Male/Female/Other)
+  - Relation (required dropdown)
+    - If "Son-in-law" or "Daughter-in-law" selected:
+      - Additional field appears: "Spouse" (dropdown)
+      - Dropdown populated with family's son/daughter names already added
+      - This links the in-law to the family member for anniversary notifications
+  - Date of Birth (required, DD/MM/YYYY format, year optional)
+    - If year omitted during entry, stored as NULL
+  - Date of Marriage (optional, DD/MM/YYYY format, year optional)
+  - Profession
+  - Email (unique check on blur)
+  - Phone (international format: +XX-XXXXXXXXXX)
   - HOF checkbox (radio button behavior - only one HOF)
-  - Email duplication check on blur
 - **Validation**:
   - At least one member required
   - Exactly one HOF required
   - All required member fields filled
-- **Display**: List of added members shown in table
+  - Email uniqueness enforced
+  - Phone accepts international formats with country codes
+- **Display**: List of added members shown in table (gender not visible in list)
 - **Navigation**: Next enabled when at least one valid member with HOF
 
 ### Step 3: Add Departed Members (Optional)
@@ -319,10 +377,17 @@ First launch triggers setup wizard:
 - **Actions**:
   - Add Departed Member
   - Edit Departed Member
-  - Remove from list
+  - Remove from list (can also soft delete if editing existing family)
+- **Departed Member Form**:
+  - Name (required)
+  - Gender (required dropdown: Male/Female/Other)
+  - Relation (required dropdown)
+  - Date of Birth (optional, DD/MM/YYYY, year optional)
+  - Date of Death (required, DD/MM/YYYY, year optional)
+  - Notes (optional, burial location, etc.)
 - **Validation**:
   - All required departed member fields filled
-  - DOD after DOB (if both provided)
+  - DOD after DOB (if both have years provided)
 - **Skip**: User can proceed without adding departed members
 - **Navigation**: Next always enabled (section is optional)
 
@@ -336,11 +401,13 @@ First launch triggers setup wizard:
        - Show warning popup:
          - "The selected image is smaller than the minimum recommended size (160×120 pixels). The image quality may be reduced when displayed."
          - Buttons: "Choose Another Image" | "Continue with This Image"
-       - If "Continue": Accept image (will be upscaled)
+       - If "Continue": Accept image (will be scaled maintaining aspect ratio)
        - If "Choose Another": Return to file chooser
 - **Preview**:
   - Show image in 160×120 box
-  - Prayer group background color fills empty space (letterbox/pillarbox)
+  - Image scaled to fit while preserving original aspect ratio (no stretching)
+  - Prayer group background color fills empty space (transparent areas show background)
+  - If image ratio doesn't match 4:3, fit according to actual ratio with transparent letterbox/pillarbox
   - "Remove Photo" button to clear selection
 - **Optional**: Photo can be skipped (placeholder image used)
 - **Navigation**: Next always enabled
@@ -397,7 +464,11 @@ First launch triggers setup wizard:
 - **Type**: Wedding anniversaries only
 - **Date Range**: Current week (Sunday - Saturday)
 - **Display**:
-  - Couple names (HOF and spouse)
+  - Couple names:
+    - **For HOF & Spouse**: "HOF Name & Spouse Name"
+    - **For Son-in-law/Daughter-in-law**: Uses spouse selection from member profile
+      - Example: "John (Son) & Mary (Daughter-in-law)"
+      - Spouse dropdown in member form links son-in-law/daughter-in-law to family member
   - Years married
   - Date (day of week)
   - Family name
@@ -431,25 +502,42 @@ First launch triggers setup wizard:
 ### Member Soft Delete (Admin/Super Admin only)
 - **Trigger**: Delete button next to individual member in edit mode
 - **Validation**: Cannot delete the only HOF (must reassign HOF first)
+- **Confirmation**: Dialog with **mandatory reason input** (10-500 characters)
 - **Actions**:
   1. Set member.is_deleted = TRUE
   2. Set member.deleted_at = current timestamp
-  3. Log action in audit log
+  3. Store deletion reason in audit log
+  4. Log action in audit log
 - **Effect**:
   - Member hidden from family card
   - Member not counted in statistics
   - Member hidden from exports (unless "Include deleted" checked)
+  - Soft delete flag visible in Admin views only
+
+### Departed Member Soft Delete (Admin/Super Admin only)
+- **Trigger**: Delete button next to departed member in edit mode
+- **Confirmation**: Dialog with **mandatory reason input** (10-500 characters)
+- **Actions**:
+  1. Set departed_member.is_deleted = TRUE
+  2. Set departed_member.deleted_at = current timestamp
+  3. Store deletion reason in audit log
+- **Effect**:
+  - Departed member hidden from family card
+  - Can be restored by Admin/Super Admin
 
 ### Restore Deleted Records (Admin/Super Admin only)
 - **Access**: Admin dashboard > Manage Deleted Records
-- **UI**: List of deleted families and individual members
+- **UI**: List of deleted families, individual members, and departed members
 - **Filters**: Date deleted, prayer group, deleted by user
+- **Deleted Record Display**: Show deletion reason and soft delete status badge
 - **Actions**:
   - Restore button (sets is_deleted = FALSE, clears deleted_at)
   - Permanently delete button (only Super Admin, requires confirmation)
 - **Family Restore**: Restores family and all its soft-deleted members
 - **Member Restore**: Restores individual member only
+- **Departed Member Restore**: Restores individual departed member only
 - **Logging**: All restore actions logged in audit log
+- **Duplicate Family Name Alert**: When restoring a family, if name already exists, show warning and offer to rename
 
 ---
 
@@ -547,14 +635,22 @@ First launch triggers setup wizard:
 
 ### Log Retention
 - **Retention Period**: 365 days (rolling)
+- **Capacity Limit**: 500 MB maximum
 - **Circular Log Behavior**:
-  - When log table exceeds capacity (disk space or 365 days):
-    - Oldest entries automatically deleted
+  - When log table exceeds 500 MB OR 365 days:
+    - Oldest entries automatically deleted (marked as "Auto-deleted by system")
     - New entries appended
-  - Super Admin can manually purge logs older than X days
-- **Capacity Management**:
-  - Daily cleanup job: Delete logs older than 365 days
-  - Warn Super Admin if log table exceeds 500 MB
+  - When Super Admin manually purges logs:
+    - Entries marked as "Deleted by Super Admin: [username]"
+  - Log entries show deletion method in metadata
+- **Super Admin Actions**:
+  - Can manually purge logs older than X days
+  - Purge action is itself logged (with note: "Manual purge by Super Admin")
+- **Daily Cleanup Job**: 
+  - Delete logs older than 365 days
+  - Delete oldest logs if total size exceeds 500 MB
+  - Mark deleted entries with deletion method
+- **Warn Super Admin**: If log table exceeds 450 MB (90% threshold)
 
 ### Super Admin Audit View
 - **Filters**:
@@ -598,36 +694,41 @@ First launch triggers setup wizard:
 
 ## 14. Role Permissions Matrix
 
-| Permission | View-Member | Add-Member | Admin | Super Admin |
-|------------|-------------|------------|-------|-------------|
-| View families/members | ✓ | ✓ | ✓ | ✗ |
-| Search directory | ✓ | ✓ | ✓ | ✗ |
-| Export family card PDF | ✓ | ✓ | ✓ | ✗ |
-| View notifications | ✓ | ✓ | ✓ | ✗ |
-| Add new family/members | ✗ | ✓ | ✓ | ✗ |
-| Edit existing data | ✗ | ✗ | ✓ | ✗ |
-| Soft delete family/member | ✗ | ✗ | ✓ | ✗ |
-| Restore deleted records | ✗ | ✗ | ✓ | ✗ |
-| Manage prayer groups | ✗ | ✗ | ✓ | ✓ |
-| Export directory PDF | ✗ | ✗ | ✓ | ✗ |
-| Export events PDF | ✗ | ✗ | ✓ | ✗ |
-| View deleted records | ✗ | ✗ | ✓ | ✓ |
-| Backup/restore database | ✗ | ✗ | ✓ | ✓ |
-| Manage users | ✗ | ✗ | ✗ | ✓ |
-| Export family list Excel | ✗ | ✗ | ✗ | ✓ |
-| Export complete data Excel | ✗ | ✗ | ✗ | ✓ |
-| View audit logs | ✗ | ✗ | ✗ | ✓ |
-| Export audit logs | ✗ | ✗ | ✗ | ✓ |
-| View system health | ✗ | ✗ | ✗ | ✓ |
-| View crash reports | ✗ | ✗ | ✗ | ✓ |
-| Change settings | ✗ | ✗ | Limited | Full |
-| Reset user passwords | ✗ | ✗ | Limited | All users |
+| Permission | Add-Member | Admin | Super Admin |
+|------------|------------|-------|-------------|
+| View families/members | ✓ (own email only) | ✓ | ✗ |
+| Search directory | ✓ (own email only) | ✓ | ✗ |
+| Export family card PDF | ✓ (own family only) | ✓ | ✗ |
+| View notifications | ✓ (own email only) | ✓ | ✗ |
+| Add new family/members | ✓ | ✓ | ✗ |
+| Edit existing data | ✗ | ✓ | ✗ |
+| Soft delete family/member | ✗ | ✓ | ✗ |
+| Restore deleted records | ✗ | ✓ | ✗ |
+| Manage prayer groups | ✗ | ✓ | ✓ |
+| Export directory PDF | ✗ | ✓ | ✗ |
+| Export events PDF | ✗ | ✓ | ✗ |
+| View deleted records | ✗ | ✓ | ✓ |
+| Backup/restore database | ✗ | ✓ | ✓ |
+| Manage users (Add-Member only) | ✗ | ✓ | ✓ |
+| Export family list Excel | ✗ | ✗ | ✓ |
+| Export complete data Excel | ✗ | ✗ | ✓ |
+| View audit logs | ✗ | ✗ | ✓ |
+| Export audit logs | ✗ | ✗ | ✓ |
+| View system health | ✗ | ✗ | ✓ |
+| View crash reports | ✗ | ✗ | ✓ |
+| Change settings | ✗ | Limited | Full |
+| Reset user passwords | ✗ | Add-Member only | All users |
+| Resize panels | ✗ | ✓ | ✓ |
+| Change own password | ✓ | ✓ | ✓ |
 
 **Notes**:
+- **View-Member role eliminated**: All Add-Member users can view data using their registered email
 - Super Admin deliberately has NO data viewing access (no family cards, no member details)
 - Super Admin operates through console: reports, exports, system management only
 - Admin has "limited" settings access: Backup location, PDF header image, but not DB location or color palette mode
-- Admin can reset passwords for View-Member and Add-Member roles only
+- Admin can create Add-Member users and disable existing Add-Member users
+- Admin can reset passwords for Add-Member role only
+- Only Admin and Super Admin can resize panels via splitters; Add-Member sees default fixed layout
 
 ---
 
@@ -661,9 +762,12 @@ First launch triggers setup wizard:
 - **Card padding**: 20px
 - **Button spacing**: 8px between buttons
 - **Form field spacing**: 12px vertical between fields
-- **Sidebar width**: 250px (resizable 200-350px)
-- **Notifications panel width**: 300px (resizable 250-400px)
+- **Sidebar width**: 250px (resizable 200-350px for Admin/Super Admin only)
+- **Notifications panel width**: 300px (resizable 250-400px for Admin/Super Admin only)
 - **Main content**: Flexible, takes remaining space
+- **Panel Resizing**: 
+  - Only Admin and Super Admin can resize panels via splitters
+  - Add-Member users see fixed default layout (no resizable splitters)
 
 ### Icons
 - Use Qt's standard icons where possible
