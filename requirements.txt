@@ -1,0 +1,26 @@
+# Church Directory Desktop Application - Python Dependencies
+
+# GUI Framework
+PySide6>=6.5.0
+
+# PDF Generation
+reportlab>=4.0.0
+
+# Excel Export
+openpyxl>=3.1.0
+
+# Password Hashing
+argon2-cffi>=23.1.0
+
+# Image Processing
+Pillow>=10.0.0
+
+# Development and Testing (optional, comment out for production)
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-qt>=4.2.0
+
+# Code Quality (optional)
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.5.0

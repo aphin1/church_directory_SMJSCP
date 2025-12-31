@@ -1,0 +1,105 @@
+# Church Directory Application - .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.pytest_cache/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Application-specific
+# Database files (local development only)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# User data (should not be committed)
+photos/
+backups/
+logs/
+crash_reports/
+
+# Configuration files with sensitive data
+config.ini
+settings.json
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+~$*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# PyQt/PySide
+*.ui.h
+*.qmlc
+*.jsc
+
+# Documentation builds
+docs/_build/
+docs/_static/
+docs/_templates/
+
+# Distribution
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.msi
+*.msix
+*.exe
