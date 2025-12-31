@@ -1,0 +1,107 @@
+erDiagram
+    Users ||--o{ AuditLog : creates
+    Users {
+        int user_id PK
+        string username UK
+        string password_hash
+        string role "Super Admin, Admin, Add-Member, View-Member"
+        string recovery_code_hash "For Super Admin only"
+        datetime created_at
+        datetime last_login
+        boolean is_active
+    }
+
+    Families ||--o{ Members : contains
+    Families ||--o{ DepartedMembers : contains
+    Families }o--|| PrayerGroups : belongs_to
+    Families {
+        int family_id PK
+        string family_name
+        string current_address
+        string home_address
+        string parish
+        int prayer_group_id FK
+        string photo_path "Relative path to image file"
+        datetime created_at
+        datetime updated_at
+        boolean is_deleted "Soft delete flag"
+        datetime deleted_at
+    }
+
+    Members {
+        int member_id PK
+        int family_id FK
+        string name
+        string relation "Head, Spouse, Child, Parent, etc"
+        date date_of_birth
+        date date_of_marriage "NULL if unmarried"
+        string profession
+        string email UK "Unique across all members"
+        string phone
+        boolean is_head_of_family
+        datetime created_at
+        datetime updated_at
+        boolean is_deleted "Soft delete flag"
+        datetime deleted_at
+    }
+
+    DepartedMembers {
+        int departed_id PK
+        int family_id FK
+        string name
+        string relation
+        date date_of_birth "Optional"
+        date date_of_death
+        string notes "Optional burial location, etc"
+        datetime created_at
+        datetime updated_at
+    }
+
+    PrayerGroups {
+        int group_id PK
+        string group_name UK
+        string background_color "Hex color code, unique"
+        datetime created_at
+        datetime updated_at
+        boolean is_active
+    }
+
+    AuditLog {
+        int log_id PK
+        int user_id FK
+        string action "login, add, edit, delete, restore, export"
+        string target_table "families, members, departed_members, etc"
+        int target_id "ID of affected record"
+        text details_json "JSON with before/after values"
+        datetime timestamp
+    }
+
+    CrashReports {
+        int crash_id PK
+        datetime timestamp
+        string error_type
+        text stack_trace
+        text user_action_history "Last 10 actions before crash"
+        string app_version
+        string os_version
+    }
+
+    AppSettings {
+        int setting_id PK
+        string key UK "db_location, backup_path, header_image_path, etc"
+        text value
+        datetime updated_at
+        int updated_by_user_id FK
+    }
+
+    SystemHealth {
+        int health_id PK
+        datetime snapshot_time
+        float cpu_usage_percent
+        int db_size_bytes
+        int photo_storage_bytes
+        int log_storage_bytes
+        int total_families
+        int total_members
+        int active_users
+    }

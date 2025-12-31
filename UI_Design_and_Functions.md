@@ -193,24 +193,9 @@ ________________________________________________________________________________
 
 New families and members are added using a guided wizard. Only **Add‑Member** role can create new entries; **Admin** and **Super Admin** can later edit.
 
-### Steps
+(Existing steps remain; only image logic updated.)
 
-1. **Step 1 – Family Information**
-   - Fields: family name, addresses, parish, prayer group.
-   - Validation for required fields and maximum lengths.
-
-2. **Step 2 – Add Members**
-   - Table form to add one or more members.
-   - Fields: name, relation, DOB, DOM, profession, email, phone, HOF flag.
-   - Email validation:
-     - Checks format (basic syntax).
-     - Checks for duplicates in local DB (no online verification). [web:9]
-   - At least one member must be marked as HOF.
-
-3. **Step 3 – Add Departed Members (Optional)**
-   - Add departed members with name, relation, DOD, and optional DOB/notes.
-
-4. **Step 4 – Photo Upload (Updated)
+### Step 4 – Photo Upload (Updated)
 
 - File chooser for family photo.
 - When the user selects an image:
@@ -221,33 +206,12 @@ New families and members are added using a guided wizard. Only **Add‑Member** 
 - Preview:
   - Show the image as it will appear in the 160×120 box, with group background color filling empty space.
 
-5. **Step 5 – Review & Submit**
-   - Read‑only summary of all data.
-   - Confirmation button to persist data to DB.
-   - On success:
-     - Family becomes visible in navigation and card view.
-     - Further edits are restricted to admin.
 ---
 
 ## Notifications Panel
 
 Same as defined earlier, showing weekly birthdays and anniversaries with week/day navigation. Background follows the current prayer group page color theme.
 
-### Visual Layout
-
-+----------------------------------------------+
-| Birthdays & Anniversaries |
-+----------------------------------------------+
-| Period: [Week ⌄] [ < ] Week of 14–20 Sep |
-+----------------------------------------------+
-| Mon 15 Sep |
-| - Shona (Birthday) |
-| |
-| Wed 17 Sep |
-| - Paul & Renu (Anniversary) |
-| |
-| ... (scrollable) |
-+----------------------------------------------+
 ---
 
 ## Roles & Permissions (Updated with Super Admin)
